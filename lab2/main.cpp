@@ -4,11 +4,13 @@
 #include <omp.h>
 #include <stdlib.h>
 
+extern double res = 0;
+
 double wtime ( )
 {
     clock_t start, end;
     double cpu_time_used;
-  double value;
+    double value;
 
   value = ( double ) clock ( ) 
         / ( double ) CLOCKS_PER_SEC;
@@ -51,13 +53,17 @@ void run_parallel(int m, int n)
     double t = wtime();
     matrix_vector_product_omp(a, b, c, m, n);
     t = wtime() - t;
+    //t = t - res;
     printf("Elapsed time (parallel): %.6f sec.\n", t);
+    //t = res / t;
+    t = t - res;
+    printf("%f", t);
     free(a);
     free(b);
     free(c);
 }
 
-void matrix_vector_product(double *a, double *b, double *c, int m, int n)
+/*void matrix_vector_product(double *a, double *b, double *c, int m, int n)
 {
     for (int i = 0; i < m; i++)
     {
@@ -85,18 +91,19 @@ void run_serial(int m, int n)
     double t = wtime();
     matrix_vector_product(a, b, c, m, n);
     t = wtime() - t;
+    //res = t;
     printf("Elapsed time (serial): %.6f sec.\n", t);
     free(a);
     free(b);
     free(c);
-}
+}*/
 
 int main(int argc, char **argv)
 {
-    int m = 25000, n = 25000;
+    int m = 40000, n = 40000;
     printf("Matrix-vector product (c[m] = a[m, n] * b[n]; m = %d, n = %d)\n", m, n);
     printf("Memory used: %" PRIu64 " MiB\n", ((m * n + m + n) * sizeof(double)) >> 20);
-    run_serial(m ,n);
+    //run_serial(m ,n);
     run_parallel(m, n);
     return 0;
 }
