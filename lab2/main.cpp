@@ -35,8 +35,7 @@ void matrix_vector_product_omp(double *a, double *b, double *c, int m, int n)
         }
     }
 }
-
-void run_parallel(int m, int n)
+double run_parallel(int m, int n)
 {
     double *a, *b, *c;
     // Allocate memory for 2-d array a[m, n]
@@ -50,20 +49,20 @@ void run_parallel(int m, int n)
     }
     for (int j = 0; j < n; j++)
         b[j] = j;
-    double t = wtime();
+    //double t = wtime();
+    double t = omp_get_wtime();
     matrix_vector_product_omp(a, b, c, m, n);
-    t = wtime() - t;
+    //t = wtime() - t;
     //t = t - res;
+    t = omp_get_wtime() - t;
     printf("Elapsed time (parallel): %.6f sec.\n", t);
-    //t = res / t;
-    t = t - res;
-    printf("%f", t);
     free(a);
     free(b);
     free(c);
+    return t;
 }
 
-/*void matrix_vector_product(double *a, double *b, double *c, int m, int n)
+void matrix_vector_product(double *a, double *b, double *c, int m, int n)
 {
     for (int i = 0; i < m; i++)
     {
@@ -73,7 +72,7 @@ void run_parallel(int m, int n)
     }
 }
 
-void run_serial(int m, int n)
+double run_serial(int m, int n)
 {
     double *a, *b, *c;
     
@@ -88,22 +87,28 @@ void run_serial(int m, int n)
     }
     for (int j = 0; j < n; j++)
         b[j] = j;
-    double t = wtime();
+    //double t = wtime();
+    double t = omp_get_wtime();
     matrix_vector_product(a, b, c, m, n);
-    t = wtime() - t;
-    //res = t;
+    t = omp_get_wtime() - t;
+    /*t = wtime() - t;
+    res = t;*/
     printf("Elapsed time (serial): %.6f sec.\n", t);
     free(a);
     free(b);
     free(c);
-}*/
+    return t;
+}
 
 int main(int argc, char **argv)
 {
-    int m = 40000, n = 40000;
+    int m = 15000, n = 15000;
+    double t, res;
     printf("Matrix-vector product (c[m] = a[m, n] * b[n]; m = %d, n = %d)\n", m, n);
     printf("Memory used: %" PRIu64 " MiB\n", ((m * n + m + n) * sizeof(double)) >> 20);
-    //run_serial(m ,n);
-    run_parallel(m, n);
+    res = run_serial(m ,n);
+    t = run_parallel(m, n);
+    t = res / t;
+    printf("speedup: %f\n", t);
     return 0;
 }
