@@ -23,9 +23,9 @@ set ylabel "Speedup" font 'Calibri,16'
 set format y "%.12g"
 
 plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-     'prog-n10k.dat' using 1:2 title "N=15000" with linespoints ls 2,\
-     'prog-n15k.dat' using 1:2 title "N=20000" with linespoints ls 3,\
-     'prog-n20k.dat' using 1:2 title "N=25000" with linespoints ls 4
+     'prog-n10k.dat' using 1:2 title "N=15000" with linespoints ls 2
      
-
+     
+plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
+     'prog-n15k.dat' using 1:2 title "N=15000" with linespoints ls 2
 

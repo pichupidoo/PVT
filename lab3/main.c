@@ -39,15 +39,15 @@ int main(int argc, char **argv)
 
 double func(double x)
 {
-    return exp(-x * x);
+    return (1 - exp((0.7)/(x)))/(2 + x);
 }
 
 int main(/*int argc, char **argv*/)
 {
     double t = omp_get_wtime();
     const double eps = 1E-6;
-    const double a = -4.0;
-    const double b = 4.0;
+    const double a = 1;
+    const double b = 2;
     const int n0 = 100000000;
     printf("Numerical integration: [%f, %f], n0 = %d, EPS = %f\n", a, b, n0, eps);
     // продолжение main()
@@ -77,9 +77,10 @@ printf("n=%d i=%d sq=%.12f delta=%.12f\n", n, k, sq[k], delta);
 #endif
         }
 #pragma omp master
-        printf("Result Pi: %.12f; Runge rule: EPS %e, n %d\n", sq[k] * sq[k], eps, n / 2);
+        printf("Result: %.12f; Runge rule: EPS %e, n %d\n", sq[k] * sq[k], eps, n / 2);
     }
     t = omp_get_wtime() - t;
-    printf("Elapsed time (sec.): %.6f\n", t);
+    printf("Elapsed time (sec.): %.3f\n", t);
+
     return 0;
 }
