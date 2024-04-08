@@ -39,10 +39,36 @@ int main(int argc, char **argv)
 
 double func(double x)
 {
-    return (1 - exp((0.7)/(x)))/(2 + x);
+    return (1 - exp((0.7) / (x))) / (2 + x);
 }
 
-int main(/*int argc, char **argv*/)
+double sereal()
+{
+    double t = omp_get_wtime();
+    const double eps = 1E-10;
+    const int n0 = 100;
+    const double a = 1;
+    const double b = 2;
+    int n = n0, k;
+    double sq[2], delta = 1;
+    for (k = 0; delta > eps; n *= 2, k ^= 1)
+    {
+        double h = (b - a) / n;
+        double s = 0.0;
+        for (int i = 0; i < n; i++)
+            s += func(a + h * (i + 0.5));
+        sq[k] = s * h;
+        if (n > n0)
+            delta = fabs(sq[k] - sq[k ^ 1]) / 3.0;
+    }
+    printf("Result: %.12f; Runge rule: EPS %e, n %d\n", sq[k] * sq[k], eps, n / 2);
+    t = omp_get_wtime() - t;
+    printf("Elapsed time sereal(sec.): %.3f\n", t);
+    return 0;
+}
+
+
+double parallel()
 {
     double t = omp_get_wtime();
     const double eps = 1E-6;
@@ -80,7 +106,17 @@ printf("n=%d i=%d sq=%.12f delta=%.12f\n", n, k, sq[k], delta);
         printf("Result: %.12f; Runge rule: EPS %e, n %d\n", sq[k] * sq[k], eps, n / 2);
     }
     t = omp_get_wtime() - t;
-    printf("Elapsed time (sec.): %.3f\n", t);
+    printf("Elapsed time parallel(sec.): %.3f\n", t);
+
+    return t;
+}
+
+int main()
+{
+    double t1 = sereal();
+    double t2 = parallel();
+
+    printf("speedup: %.2f\n", t1/t2);
 
     return 0;
 }
