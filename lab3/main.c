@@ -45,8 +45,8 @@ double func(double x)
 double sereal()
 {
     double t = omp_get_wtime();
-    const double eps = 1E-10;
-    const int n0 = 100;
+    const double eps = 1E-6;
+    const int n0 = 100000000;
     const double a = 1;
     const double b = 2;
     int n = n0, k;
