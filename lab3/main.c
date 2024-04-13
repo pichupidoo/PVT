@@ -64,7 +64,7 @@ double sereal()
     printf("Result: %.12f; Runge rule: EPS %e, n %d\n", sq[k] * sq[k], eps, n / 2);
     t = omp_get_wtime() - t;
     printf("Elapsed time sereal(sec.): %.3f\n", t);
-    return 0;
+    return t;
 }
 
 
@@ -115,8 +115,9 @@ int main()
 {
     double t1 = sereal();
     double t2 = parallel();
+    double t3 = t1/t2;
 
-    printf("speedup: %.2f\n", t1/t2);
+    printf("speedup: %.2f\n", t3);
 
     return 0;
 }
