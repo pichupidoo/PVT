@@ -11,13 +11,9 @@ struct particle
 
 double wtime()
 {
-    clock_t start, end;
-    double cpu_time_used;
-    double value;
-
-    value = (double)clock() / (double)CLOCKS_PER_SEC;
-
-    return value;
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
 }
 
 const float G = 6.67e-11;
@@ -75,58 +71,53 @@ void move_particles(struct particle *p, struct particle *f, struct particle *v, 
 
 int main(int argc, char *argv[])
 {
-    double ttotal, tinit = 0, tforces = 0, tmove = 0;
-    ttotal = omp_get_wtime();
-    int n = (argc > 1) ? atoi(argv[1]) : 10;
-    char *filename = (argc > 2) ? argv[2] : NULL;
-    tinit = -omp_get_wtime();
-    struct particle *p = malloc(sizeof(*p) * n); // Положение частиц (x, y, z)
-    struct particle *f = malloc(sizeof(*f) * n); // Сила, действующая на каждую частицу (x, y, z)
-    struct particle *v = malloc(sizeof(*v) * n); // Скорость частицы (x, y, z)
-    float *m = malloc(sizeof(*m) * n);           // Масса частицы
-    for (int i = 0; i < n; i++)
-    {
-        p[i].x = rand() / (float)RAND_MAX - 0.5;
-        p[i].y = rand() / (float)RAND_MAX - 0.5;
-        p[i].z = rand() / (float)RAND_MAX - 0.5;
-        v[i].x = rand() / (float)RAND_MAX - 0.5;
-        v[i].y = rand() / (float)RAND_MAX - 0.5;
-        v[i].z = rand() / (float)RAND_MAX - 0.5;
-        m[i] = rand() / (float)RAND_MAX * 10 + 0.01;
-        f[i].x = f[i].y = f[i].z = 0;
-    }
-    tinit += omp_get_wtime();
-    double dt = 1e-5;
-    for (double t = 0; t <= 1; t += dt)
-    { // Цикл по времени (модельному)
-        tforces -= omp_get_wtime();
-        calculate_forces_section(p, f, m, n); // Вычисление сил – O(N^2)
-        tforces += omp_get_wtime();
-        tmove -= omp_get_wtime();
-        move_particles(p, f, v, m, n, dt); // Перемещение тел O(N)
-        tmove += omp_get_wtime();
-    }
-    ttotal = omp_get_wtime() - ttotal;
-    printf("# NBody (n=%d)\n", n);
-    printf("# Elapsed time (sec): ttotal %.6f, tinit %.6f, tforces %.6f, tmove %.6f\n",
-           ttotal, tinit, tforces, tmove);
-    if (filename)
-    {
-        FILE *fout = fopen(filename, "w");
-        if (!fout)
-        {
-            fprintf(stderr, "Can't save file\n");
-            exit(EXIT_FAILURE);
-        }
-        for (int i = 0; i < n; i++)
-        {
-            fprintf(fout, "%15f %15f %15f\n", p[i].x, p[i].y, p[i].z);
-        }
-        fclose(fout);
-    }
-    free(m);
-    free(v);
-    free(f);
-    free(p);
-    return 0;
+double ttotal, tinit = 0, tforces = 0, tmove = 0;
+ttotal = wtime();
+int n = (argc > 1) ? atoi(argv[1]) : 10;
+char *filename = (argc > 2) ? argv[2] : NULL;
+tinit = -wtime();
+struct particle *p = malloc(sizeof(*p) * n); // Положение частиц (x, y, z)
+struct particle *f = malloc(sizeof(*f) * n); // Сила, действующая на каждую частицу (x, y, z)
+struct particle *v = malloc(sizeof(*v) * n); // Скорость частицы (x, y, z)
+float *m = malloc(sizeof(*m) * n); // Масса частицы
+for (int i = 0; i < n; i++) {
+p[i].x = rand() / (float)RAND_MAX - 0.5;
+p[i].y = rand() / (float)RAND_MAX - 0.5;
+p[i].z = rand() / (float)RAND_MAX - 0.5;
+v[i].x = rand() / (float)RAND_MAX - 0.5;
+v[i].y = rand() / (float)RAND_MAX - 0.5;
+v[i].z = rand() / (float)RAND_MAX - 0.5;
+m[i] = rand() / (float)RAND_MAX * 10 + 0.01;
+f[i].x = f[i].y = f[i].z = 0;
+}
+tinit += wtime();
+double dt = 1e-5;
+for (double t = 0; t <= 1; t += dt) { // Цикл по времени (модельному)
+tforces -= wtime();
+calculate_forces(p, f, m, n); // Вычисление сил – O(N^2)
+tforces += wtime();
+tmove -= wtime();
+move_particles(p, f, v, m, n, dt); // Перемещение тел O(N)
+tmove += wtime();
+}
+ttotal = wtime() - ttotal;
+printf("# NBody (n=%d)\n", n);
+printf("# Elapsed time (sec): ttotal %.6f, tinit %.6f, tforces %.6f, tmove %.6f\n",
+ttotal, tinit, tforces, tmove);
+if (filename) {
+FILE *fout = fopen(filename, "w");
+if (!fout) {
+fprintf(stderr, "Can't save file\n");
+exit(EXIT_FAILURE);
+}
+for (int i = 0; i < n; i++) {
+fprintf(fout, "%15f %15f %15f\n", p[i].x, p[i].y, p[i].z);
+}
+fclose(fout);
+}
+free(m);
+free(v);
+free(f);
+free(p);
+return 0;
 }

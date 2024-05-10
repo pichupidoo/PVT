@@ -10,12 +10,12 @@ struct particle
     float x, y, z;
 };
 
-double wtime()
+/*double wtime()
 {
     struct timeval t;
     gettimeofday(&t, NULL);
     return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
-}
+}*/
 
 const float G = 6.67e-11;
 
@@ -89,10 +89,10 @@ void move_particles(struct particle *p, struct particle *f[], struct particle *v
 int main(int argc, char *argv[])
 {
     double ttotal, tinit = 0, tforces = 0, tmove = 0;
-    ttotal = wtime();
+    ttotal = omp_get_wtime();
     int n = (argc > 1) ? atoi(argv[1]) : 10;
     char *filename = (argc > 2) ? argv[2] : NULL;
-    tinit = -wtime();
+    tinit = -omp_get_wtime();
     struct particle *p = malloc(sizeof(*p) * n); 
     struct particle *f[omp_get_max_threads()];
     for (int i = 0; i < omp_get_max_threads(); i++)
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
         v[i].z = rand() / (float)RAND_MAX - 0.5;
         m[i] = rand() / (float)RAND_MAX * 10 + 0.01;
     }
-    tinit += wtime();
+    tinit += omp_get_wtime();
     double dt = 1e-5;
 #pragma omp parallel num_threads(THREADS) 
     {
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 #pragma omp barrier 
         }
     }
-    ttotal = wtime() - ttotal;
+    ttotal = omp_get_wtime() - ttotal;
     printf("# NBody (n=%d)\n", n);
     printf("# Elapsed time (sec): ttotal %.6f, tinit %.6f, tforces %.6f, tmove %.6f\n",
            ttotal, tinit, tforces, tmove);

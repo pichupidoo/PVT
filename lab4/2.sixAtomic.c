@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
     }
     tinit += omp_get_wtime();
     double dt = 1e-5;
+
 #pragma omp parallel // Параллельный регион активируется один раз
     {
         for (double t = 0; t <= 1; t += dt)
