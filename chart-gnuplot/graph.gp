@@ -1,5 +1,5 @@
 set terminal pdf color enhanced font 'Calibri,16' size 14cm,10cm
-set output 'graph2.pdf'
+set output 'graph.pdf'
 set key inside left top font 'Calibri,16'
 set colorsequence podo
 set style line 1 lc rgb 'blue' lw 1 pt 5 ps 0.5
@@ -23,10 +23,13 @@ set ylabel "Speedup" font 'Calibri,16'
 set format y "%.12g"
 
 plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-     'prog-n10k.dat' using 1:2 title "Runge" with linespoints ls 2
+     'e1.dat' using 1:2 title "exp1" with linespoints ls 2,\
+     'e2.dat' using 1:2 title "exp2" with linespoints ls 3,\
+     'e3.dat' using 1:2 title "exp3" with linespoints ls 4,\
+     'e4.dat' using 1:2 title "exp4" with linespoints ls 5,\
+     'e5.dat' using 1:2 title "exp5" with linespoints ls 6
      
      
 plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-     'prog-n15k.dat' using 1:2 title "n=10^7" with linespoints ls 2,\
-     'prog-n20k.dat' using 1:2 title "n=10^8" with linespoints ls 3
+     'e5.dat' using 1:2 title "exp5" with linespoints ls 2
 
