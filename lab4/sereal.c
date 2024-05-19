@@ -2,7 +2,6 @@
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>
-#include <omp.h>
 
 struct particle
 {

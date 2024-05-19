@@ -1,19 +1,27 @@
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <math.h>
 #include <omp.h>
+
+#define THREADS 8
 
 struct particle
 {
     float x, y, z;
 };
 
+double wtime()
+{
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
+}
+
 const float G = 6.67e-11;
 
 void calculate_forces(struct particle *p, struct particle *f, float *m, int n)
 {
-#pragma omp for schedule(dynamic, 4) nowait // Циклическое распределение итераций
+#pragma omp for schedule(dynamic, 8) nowait // Циклическое распределение итераций
     for (int i = 0; i < n - 1; i++)
     {
         for (int j = i + 1; j < n; j++)
@@ -68,10 +76,10 @@ void move_particles(struct particle *p, struct particle *f, struct particle *v,
 int main(int argc, char *argv[])
 {
     double ttotal, tinit = 0, tforces = 0, tmove = 0;
-    ttotal = omp_get_wtime();
+    ttotal = wtime();
     int n = (argc > 1) ? atoi(argv[1]) : 10;
     char *filename = (argc > 2) ? argv[2] : NULL;
-    tinit = -omp_get_wtime();
+    tinit = -wtime();
     struct particle *p = malloc(sizeof(*p) * n); // Положение частиц (x, y, z)
     struct particle *f = malloc(sizeof(*f) * n); // Сила, действующая на каждую частицу (x, y, z)
     struct particle *v = malloc(sizeof(*v) * n); // Скорость частицы (x, y, z)
@@ -87,10 +95,9 @@ int main(int argc, char *argv[])
         m[i] = rand() / (float)RAND_MAX * 10 + 0.01;
         f[i].x = f[i].y = f[i].z = 0;
     }
-    tinit += omp_get_wtime();
+    tinit += wtime();
     double dt = 1e-5;
-
-#pragma omp parallel // Параллельный регион активируется один раз
+#pragma omp parallel num_threads(THREADS) // Параллельный регион активируется один раз
     {
         for (double t = 0; t <= 1; t += dt)
         {
@@ -100,7 +107,7 @@ int main(int argc, char *argv[])
 #pragma omp barrier // Ожидание завершения обновления p[i], f[i]
         }
     }
-    ttotal = omp_get_wtime() - ttotal;
+    ttotal = wtime() - ttotal;
     printf("# NBody (n=%d)\n", n);
     printf("# Elapsed time (sec): ttotal %.6f, tinit %.6f, tforces %.6f, tmove %.6f\n",
            ttotal, tinit, tforces, tmove);

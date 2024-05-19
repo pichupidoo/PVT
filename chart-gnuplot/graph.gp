@@ -23,13 +23,9 @@ set ylabel "Speedup" font 'Calibri,16'
 set format y "%.12g"
 
 plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-     'e1.dat' using 1:2 title "exp1" with linespoints ls 2,\
-     'e2.dat' using 1:2 title "exp2" with linespoints ls 3,\
-     'e3.dat' using 1:2 title "exp3" with linespoints ls 4,\
-     'e4.dat' using 1:2 title "exp4" with linespoints ls 5,\
-     'e5.dat' using 1:2 title "exp5" with linespoints ls 6
+     'e1.dat' using 1:2 title "N=10^9, THRESHOLD=1000" with linespoints ls 3,\
+     'e2.dat' using 1:2 title "N=10^9, THRESHOLD=100" with linespoints ls 9,\
+     'e3.dat' using 1:2 title "N=10^8, THRESHOLD=100" with linespoints ls 4,\
+     'e4.dat' using 1:2 title "N=10^8, THRESHOLD=1000" with linespoints ls 5
      
-     
-plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-     'e5.dat' using 1:2 title "exp5" with linespoints ls 2
 
