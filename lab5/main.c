@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <omp.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #define N 10000000
-#define THRESHOLD 10000
+#define THRESHOLD 1000
 
 void swap(int *x, int *y)
 {
@@ -52,18 +53,28 @@ void fquicksort_tasks(int *v, int low, int high)
     }
     else
     {
-#pragma omp task untied // Открепить задачу от потока (задачу может выполнять любой поток)
+#pragma omp task
         {
             fquicksort_tasks(v, low, j);
         }
-        fquicksort_tasks(v, i, high);
+#pragma omp task
+        {
+            fquicksort_tasks(v, i, high);
+        }
+#pragma omp taskwait
     }
 }
 
-double quicksort_tasks(int *v, int low, int high) 
+double quicksort_tasks(int *v, int low, int high)
 {
     double t = wtime();
-    fquicksort_tasks(v, low, high);
+#pragma omp parallel
+    {
+#pragma omp single
+        {
+            fquicksort_tasks(v, low, high);
+        }
+    }
     t = wtime() - t;
     return t;
 }
@@ -92,16 +103,9 @@ void init(int **arr)
         (*arr)[i] = rand() % 100;
 }
 
-void print_arr(int *arr)
+void renew(int *arr, int *arr_loc)
 {
     for (int i = 0; i < N; i++)
-        printf("%d ", arr[i]);
-    printf("\n");
-}
-
-void renew (int *arr, int *arr_loc)
-{
-    for(int i = 0; i < N; i++)
         arr_loc[i] = arr[i];
 }
 
@@ -111,26 +115,26 @@ int main()
     int *arr = malloc(sizeof(int) * N);
     init(&arr);
 
-    renew (arr, arr_loc);
+    renew(arr, arr_loc);
 
     double t1 = quicksort(arr_loc, 0, N - 1);
 
-    renew (arr, arr_loc);
+    renew(arr, arr_loc);
 
-    int num_threads_list[] = {2, 4, 6, 8}; 
+    int num_threads_list[] = {2, 4, 6, 8};
     int num_tests = sizeof(num_threads_list) / sizeof(num_threads_list[0]);
     double t2;
     for (int i = 0; i < num_tests; i++)
     {
-#pragma omp parallel num_threads(num_threads_list[i])
-    {
-#pragma omp single
+        omp_set_num_threads(num_threads_list[i]);
         t2 = quicksort_tasks(arr_loc, 0, N - 1);
-    }
-        double speedup = t1 / t2; 
+        double speedup = t1 / t2;
         printf("Speedup with %d threads: %.2f\n", num_threads_list[i], speedup);
-        renew (arr, arr_loc);
-    }   
+        renew(arr, arr_loc);
+    }
+
+    free(arr_loc);
+    free(arr);
 
     return 0;
 }
