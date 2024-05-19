@@ -11,9 +11,9 @@ struct particle
 
 double wtime()
 {
-    struct timeval t;
-    gettimeofday(&t, NULL);
-    return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
+    struct timeval tt;
+    gettimeofday(&tt, NULL);
+    return (double)tt.tv_sec + (double)tt.tv_usec * 1E-6;
 }
 
 const float G = 6.67e-11;
