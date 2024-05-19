@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define N 10000000
+#define N 100000000
 #define THRESHOLD 1000
 
 void swap(int *x, int *y)
