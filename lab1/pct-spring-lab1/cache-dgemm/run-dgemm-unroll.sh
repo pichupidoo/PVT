@@ -1,3 +1,3 @@
 #!/bin/sh
 
-taskset --cpu-list 0 ./dgemm-unroll
+sudo perf stat -e cache-references,cache-misses ./dgemm-unroll
